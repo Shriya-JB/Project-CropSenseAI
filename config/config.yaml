@@ -1,0 +1,104 @@
+# CropSenseAI Configuration File
+
+app:
+  name: CropSenseAI
+  version: 1.0.0
+  debug: false
+  environment: development
+
+model:
+  crop_classification:
+    model_type: "RandomForest"
+    input_size: [128, 128]        # FIXED: was 224x224 (for deep learning); 128x128 matches actual code
+    batch_size: 32
+    epochs: 50
+    learning_rate: 0.001
+    checkpoint_path: "data/models/crop_classifier.pkl"   # FIXED: was .h5 (TensorFlow); code uses .pkl (sklearn)
+    class_mapping_path: "data/models/class_mapping.json"
+
+  stress_detection:
+    model_type: "DecisionTree"
+    checkpoint_path: "data/models/moisture_detector.pkl"  # FIXED: was .h5
+
+data:
+  train_split: 0.8
+  validation_split: 0.0          # FIXED: we use simple train/test split; no separate val
+  test_split: 0.2
+  augmentation: false            # FIXED: not implemented yet; set false to reflect reality
+  normalization: "minmax"
+
+  paths:
+    raw_data: "data/raw/"
+    processed_data: "data/processed/"
+    model_artifacts: "data/models/"
+
+crops:
+  supported_crops:               # FIXED: lowercase to match folder names and class_mapping.json
+    - cotton
+    - maize
+    - rice
+    - wheat
+  confidence_threshold: 0.70     # FIXED: lowered from 0.85 (unrealistic for RF on small dataset)
+
+stress_detection:
+  stress_types:
+    - moisture_stress
+    - nutrient_deficiency
+  severity_levels:
+    - low stress
+    - medium stress
+    - high stress
+  features:
+    - vegetation_index
+    - temperature
+    - rainfall
+
+irrigation:
+  default_water_units: "mm"
+  recommendation_frequency_hours: 24
+
+  crop_water_requirements:
+    cotton:
+      low: 400
+      medium: 600
+      high: 800
+    maize:
+      low: 500
+      medium: 700
+      high: 900
+    rice:
+      low: 800
+      medium: 1000
+      high: 1200
+    wheat:
+      low: 300
+      medium: 500
+      high: 700
+
+database:
+  type: "sqlite"
+  sqlite:
+    path: "data/cropsenseai.db"
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  log_file: "logs/cropsenseai.log"
+  max_bytes: 10485760
+  backup_count: 5
+
+dashboard:
+  page_title: "CropSenseAI Dashboard"
+  layout: "wide"
+  theme: "light"
+  components:
+    show_confidence_scores: true
+    show_processing_time: true
+    enable_image_upload: true
+    max_upload_size_mb: 10
+
+features:
+  enable_real_time_monitoring: false
+  enable_weather_integration: false
+  enable_historical_comparison: true
+  enable_batch_processing: true
